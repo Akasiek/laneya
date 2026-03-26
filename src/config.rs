@@ -4,7 +4,7 @@ static CONFIG: LazyLock<Config> = LazyLock::new(Config::from_env);
 
 pub struct Config {
     pub filter_out_shorts: bool,
-    pub per_page: i64,
+    pub videos_per_page: i64,
 }
 
 impl Config {
@@ -17,7 +17,7 @@ impl Config {
             filter_out_shorts: std::env::var("FILTER_OUT_SHORTS")
                 .map(|v| v.eq_ignore_ascii_case("true"))
                 .unwrap_or(false),
-            per_page: std::env::var("PER_PAGE")
+            videos_per_page: std::env::var("VIDEOS_PER_PAGE")
                 .ok()
                 .and_then(|v| v.parse().ok())
                 .unwrap_or(24),

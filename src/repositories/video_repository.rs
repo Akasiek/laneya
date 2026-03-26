@@ -75,7 +75,7 @@ impl VideoRepository {
         conn: &mut SqliteConnection,
         page: i64,
     ) -> anyhow::Result<(Vec<VideoResource>, i64)> {
-        let per_page = crate::config::Config::get().per_page;
+        let per_page = crate::config::Config::get().videos_per_page;
 
         let total: i64 = videos::table.count().get_result(conn)?;
         let total_pages = ((total + per_page - 1) / per_page).max(1);
