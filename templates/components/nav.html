@@ -1,0 +1,23 @@
+<nav class="sticky top-0 z-10 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 ">
+    <div class="container mx-auto px-4 py-3 flex items-center gap-6">
+
+        <span class="font-extrabold text-lg tracking-tight">Lanéya</span>
+        <a href="/"
+           class="nav-link text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 transition"
+        >
+            Feed
+        </a>
+        <a href="/channels"
+           class="nav-link text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 transition"
+        >
+            Channels
+        </a>
+    </div>
+</nav>
+<script>
+    document.querySelectorAll('.nav-link').forEach(a => {
+        if (a.getAttribute('href') === window.location.pathname) {
+            a.classList.add('!text-amber-500', 'dark:!text-amber-400');
+        }
+    });
+</script>

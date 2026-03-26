@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Laneya — Channels{% endblock %}
+{% block nav_channels %}text-amber-500 dark:text-amber-400{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+    <h2 class="text-2xl font-bold mb-6">Channels</h2>
+
+    <!-- Add Channel Form -->
+    <form hx-post="/channels"
+          hx-target="#add-feedback"
+          hx-swap="innerHTML"
+          class="flex flex-wrap gap-2 items-start mb-8 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+
+        <h3 class="w-full text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Add Channel</h3>
+
+        <input
+                type="text"
+                name="channel_name"
+                placeholder="Display name"
+                required
+                class="px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 w-44"
+        />
+
+        <input
+                type="text"
+                name="channel_id"
+                placeholder="Channel ID (e.g. UCxxxxxxxx)"
+                required
+                class="px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 w-64"
+        />
+
+
+        <button
+                type="submit"
+                class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition"
+        >
+            + Add
+        </button>
+
+        <div class="text-zinc-500 dark:text-zinc-400 text-sm mt-2 w-full">
+            For information on how to find a channel ID, see
+            <a
+                    target="_blank"
+                    href="https://codeberg.org/Akasiek/laneya/src/branch/main/README.md"
+                    class="underline hover:text-amber-500 dark:hover:text-amber-400 transition"
+            > project README</a>.
+        </div>
+
+        <div id="add-feedback" class="w-full"></div>
+    </form>
+
+    <!-- Channels Table -->
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 text-left">
+            <tr>
+                <th class="px-4 py-3 font-medium">Name</th>
+                <th class="px-4 py-3 font-medium">Channel ID</th>
+                <th class="px-4 py-3 font-medium">Added</th>
+                <th class="px-4 py-3"></th>
+            </tr>
+            </thead>
+            <tbody id="channels-list" class="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {% for channel in channels %}
+            {% include "pages/channel_row.html" %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% if channels.is_empty() %}
+        <p class="text-center text-zinc-500 dark:text-zinc-400 py-10 text-sm">No channels yet. Add one above.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+

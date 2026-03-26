@@ -70,4 +70,10 @@ impl VideoRepository {
             .load::<Video>(conn)?;
         Ok(result)
     }
+
+    pub fn delete_by_channel_id(conn: &mut SqliteConnection, channel_db_id: i32) -> anyhow::Result<()> {
+        diesel::delete(videos::table.filter(videos::channel_id.eq(channel_db_id)))
+            .execute(conn)?;
+        Ok(())
+    }
 }

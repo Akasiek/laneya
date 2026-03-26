@@ -10,10 +10,12 @@ pub fn start_feed_refresh_job(feed_tx: broadcast::Sender<()>) {
             interval.tick().await;
             tracing::info!("Starting scheduled feed refresh...");
             let changed = ChannelRepository::fetch_all_feeds().await;
-            
+
             if changed {
                 tracing::info!("Feed changed, notifying clients.");
                 let _ = feed_tx.send(());
+            } else {
+                tracing::info!("No changes detected in feeds.");
             }
         }
     });
