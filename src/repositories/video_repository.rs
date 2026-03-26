@@ -13,11 +13,11 @@ impl VideoRepository {
         channel_db_id: i32,
         feed: &YoutubeFeed,
     ) -> anyhow::Result<bool> {
-        let filter_shorts = crate::config::Config::get().filter_shorts;
+        let filter_out_shorts = crate::config::Config::get().filter_out_shorts;
         let mut changed = false;
 
         for entry in &feed.entries {
-            if filter_shorts
+            if filter_out_shorts
                 && entry
                     .link
                     .href
