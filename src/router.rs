@@ -4,6 +4,7 @@ use crate::handlers::channel_api_handler::{
 };
 use crate::handlers::channel_page_handler::channels_page;
 use crate::handlers::index_handler::index;
+use crate::handlers::video_handler::video_list;
 use crate::handlers::ws_handler::ws_handler;
 use axum::Router;
 use axum::extract::MatchedPath;
@@ -17,6 +18,7 @@ pub fn get_app_router(state: AppState) -> Router {
     Router::new()
         .merge(pages_router())
         .nest("/channels", channels_router())
+        .nest("/videos", videos_router())
         .route("/ws", get(ws_handler))
         .nest_service("/static", ServeDir::new("templates/static"))
         .with_state(state)
@@ -51,4 +53,9 @@ fn channels_router() -> Router<AppState> {
         .route("/{id}", put(update_channel).delete(delete_channel))
         .route("/{id}/edit", get(edit_channel_form))
         .route("/{id}/row", get(channel_row))
+}
+
+/// Routes used internally by HTMX for video fragments.
+fn videos_router() -> Router<AppState> {
+    Router::new().route("/", get(video_list))
 }

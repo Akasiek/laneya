@@ -71,8 +71,18 @@ impl VideoRepository {
         }
     }
 
-    pub fn find_all_recent(conn: &mut SqliteConnection) -> anyhow::Result<Vec<VideoResource>> {
-        videos::table
+    pub fn find_paginated(
+        conn: &mut SqliteConnection,
+        page: i64,
+    ) -> anyhow::Result<(Vec<VideoResource>, i64)> {
+        let per_page = crate::config::Config::get().per_page;
+
+        let total: i64 = videos::table.count().get_result(conn)?;
+        let total_pages = ((total + per_page - 1) / per_page).max(1);
+        let page = page.clamp(1, total_pages);
+        let offset = (page - 1) * per_page;
+
+        let rows = videos::table
             .inner_join(channels::table)
             .select((
                 videos::id,
@@ -85,6 +95,8 @@ impl VideoRepository {
                 channels::channel_name,
             ))
             .order(videos::published_at.desc())
+            .limit(per_page)
+            .offset(offset)
             .load::<VideoResource>(conn)
             .map(|rows| {
                 rows.into_iter()
@@ -93,8 +105,9 @@ impl VideoRepository {
                         v
                     })
                     .collect()
-            })
-            .map_err(Into::into)
+            })?;
+
+        Ok((rows, total_pages))
     }
 
     pub fn delete_by_channel_id(

@@ -10,6 +10,8 @@ pub struct IndexTemplate {}
 #[template(path = "components/video_grid.html")]
 pub struct VideoGridTemplate {
     pub videos: Vec<VideoResource>,
+    pub page: i64,
+    pub total_pages: i64,
 }
 
 #[derive(Template)]

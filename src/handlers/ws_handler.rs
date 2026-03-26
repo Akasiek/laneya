@@ -37,7 +37,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState) {
 
 fn render_video_grid() -> Option<String> {
     let conn = &mut db::establish_connection();
-    let videos = VideoRepository::find_all_recent(conn).ok()?;
-    let template = VideoGridTemplate { videos };
+    let (videos, total_pages) = VideoRepository::find_paginated(conn, 1).ok()?;
+    let template = VideoGridTemplate { videos, page: 1, total_pages };
     template.render().ok()
 }

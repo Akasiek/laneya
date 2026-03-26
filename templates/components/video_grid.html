@@ -1,6 +1,45 @@
-<div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {% for video in videos %}
+<div id="video-section">
+    {% if videos.is_empty() %}
+    <p class="text-zinc-500 dark:text-zinc-400 text-center py-16">No videos yet.</p>
+    {% else %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for video in videos %}
         {% include "components/video_card.html" %}
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
+    {% if total_pages > 1 %}
+    <div class="flex justify-center items-center gap-3 mt-10">
+        {% if page > 1 %}
+        <button hx-get="/videos?page={{ page - 1 }}"
+                hx-target="#video-section"
+                hx-swap="outerHTML"
+                class="px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-sm font-medium transition">
+            ← Prev
+        </button>
+        {% else %}
+        <button disabled
+                class="px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium opacity-40 cursor-not-allowed">
+            ← Prev
+        </button>
+        {% endif %}
+
+        <span class="text-sm text-zinc-500 dark:text-zinc-400 tabular-nums">{{ page }} / {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+        <button hx-get="/videos?page={{ page + 1 }}"
+                hx-target="#video-section"
+                hx-swap="outerHTML"
+                class="px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-sm font-medium transition">
+            Next →
+        </button>
+        {% else %}
+        <button disabled
+                class="px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium opacity-40 cursor-not-allowed">
+            Next →
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
