@@ -343,6 +343,9 @@
   .max-w-7xl {
     max-width: var(--container-7xl);
   }
+  .flex-1 {
+    flex: 1;
+  }
   .border-collapse {
     border-collapse: collapse;
   }
