@@ -2,3 +2,4 @@
 /templates/node_modules
 .idea
 database.db
+.env
