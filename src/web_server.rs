@@ -4,7 +4,7 @@ use listenfd::ListenFd;
 use tokio::net::TcpListener;
 use tracing::info;
 
-pub async fn init_web_server(state: AppState) {
+pub async fn init(state: AppState) {
     let router = get_app_router(state);
     let listener = get_app_listener().await;
 
