@@ -7,7 +7,7 @@ use crate::models::video::Video;
 pub struct IndexTemplate {}
 
 #[derive(Template)]
-#[template(path = "pages/video_grid.html")]
+#[template(path = "components/video_grid.html")]
 pub struct VideoGridTemplate {
     pub videos: Vec<Video>,
 }
@@ -23,13 +23,13 @@ pub struct ChannelsTemplate {
 }
 
 #[derive(Template)]
-#[template(path = "pages/channel_row.html")]
+#[template(path = "components/channel_row.html")]
 pub struct ChannelRowTemplate {
     pub channel: Channel,
 }
 
 #[derive(Template)]
-#[template(path = "pages/channel_edit_row.html")]
+#[template(path = "components/channel_edit_row.html")]
 pub struct ChannelEditRowTemplate {
     pub channel: Channel,
     pub error: Option<String>,
