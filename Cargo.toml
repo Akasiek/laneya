@@ -25,6 +25,7 @@ quick-xml = { version = "0.39", features = ["serialize"] }
 # Database
 #
 diesel = { version = "2", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "chrono"] }
+diesel_migrations = "2"
 
 #
 # HTMX and Templating
