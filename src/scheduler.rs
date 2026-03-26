@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::repositories::channel_repository::ChannelRepository;
 use std::time::Duration;
 use tokio::sync::broadcast;
@@ -5,7 +6,10 @@ use tokio::time;
 
 pub fn start_feed_refresh_job(feed_tx: broadcast::Sender<()>) {
     tokio::spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(5 * 60));
+        let interval_mins = Config::get().feed_refresh_interval_mins;
+        let mut interval = time::interval(Duration::from_secs(interval_mins * 60));
+        tracing::info!("Feed refresh interval set to {} minutes.", interval_mins);
+
         loop {
             interval.tick().await;
             tracing::info!("Starting scheduled feed refresh...");

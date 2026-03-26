@@ -11,6 +11,8 @@ services:
       FILTER_OUT_SHORTS: "true"
       # Number of videos to show per page
       VIDEOS_PER_PAGE: "24"
+      # How often to fetch new videos from YouTube
+      FEED_REFRESH_INTERVAL_MINS: "5"
 
 volumes:
   laneya_data:

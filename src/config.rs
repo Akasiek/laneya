@@ -5,6 +5,7 @@ static CONFIG: LazyLock<Config> = LazyLock::new(Config::from_env);
 pub struct Config {
     pub filter_out_shorts: bool,
     pub videos_per_page: i64,
+    pub feed_refresh_interval_mins: u64,
 }
 
 impl Config {
@@ -21,6 +22,10 @@ impl Config {
                 .ok()
                 .and_then(|v| v.parse().ok())
                 .unwrap_or(24),
+            feed_refresh_interval_mins: std::env::var("FEED_REFRESH_INTERVAL_MINS")
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(5),
         }
     }
 }
