@@ -1,0 +1,17 @@
+services:
+  laneya:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - laneya_data:/data
+    environment:
+      # Set to true to skip YouTube Shorts
+      FILTER_OUT_SHORTS: "true"
+      # Number of videos to show per page
+      VIDEOS_PER_PAGE: "24"
+
+volumes:
+  laneya_data:
+

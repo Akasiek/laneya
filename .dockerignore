@@ -1,0 +1,7 @@
+target/
+templates/node_modules/
+database.db
+.env
+.git/
+.idea/
+
