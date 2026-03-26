@@ -11,24 +11,17 @@ use crate::models::channel::NewChannel;
 use crate::render_template;
 use crate::repositories::channel_repository::ChannelRepository;
 use crate::services::feed_reader_service::validate_channel_id;
-use crate::templates::{ChannelEditRowTemplate, ChannelRowTemplate, ChannelsTemplate};
+use crate::templates::{ChannelEditRowTemplate, ChannelRowTemplate};
 
 #[derive(Deserialize)]
-pub struct AddChannelForm {
+pub struct ChannelForm {
     pub channel_id: String,
     pub channel_name: String,
 }
 
-pub async fn channels_page() -> impl IntoResponse {
-    let conn = &mut db::establish_connection();
-    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
-    let template = ChannelsTemplate { channels };
-    render_template!(template)
-}
-
 pub async fn add_channel(
     State(state): State<AppState>,
-    Form(form): Form<AddChannelForm>,
+    Form(form): Form<ChannelForm>,
 ) -> impl IntoResponse {
     let channel_id = form.channel_id.trim().to_string();
     let channel_name = form.channel_name.trim().to_string();
@@ -56,32 +49,10 @@ pub async fn add_channel(
     }
 }
 
-pub async fn edit_channel_form(Path(id): Path<i32>) -> impl IntoResponse {
-    let conn = &mut db::establish_connection();
-    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
-    if let Some(channel) = channels.into_iter().find(|c| c.id == id) {
-        let template = ChannelEditRowTemplate { channel, error: None };
-        render_template!(template)
-    } else {
-        Html("<p class='text-red-500'>Not found</p>".to_string())
-    }
-}
-
-pub async fn channel_row(Path(id): Path<i32>) -> impl IntoResponse {
-    let conn = &mut db::establish_connection();
-    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
-    if let Some(channel) = channels.into_iter().find(|c| c.id == id) {
-        let template = ChannelRowTemplate { channel };
-        render_template!(template)
-    } else {
-        Html(String::new())
-    }
-}
-
 pub async fn update_channel(
     Path(id): Path<i32>,
     State(state): State<AppState>,
-    Form(form): Form<AddChannelForm>,
+    Form(form): Form<ChannelForm>,
 ) -> Html<String> {
     let channel_id = form.channel_id.trim().to_string();
     let channel_name = form.channel_name.trim().to_string();
@@ -129,6 +100,28 @@ pub async fn delete_channel(
     }
 }
 
+pub async fn edit_channel_form(Path(id): Path<i32>) -> impl IntoResponse {
+    let conn = &mut db::establish_connection();
+    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
+    if let Some(channel) = channels.into_iter().find(|c| c.id == id) {
+        let template = ChannelEditRowTemplate { channel, error: None };
+        render_template!(template)
+    } else {
+        Html("<p class='text-red-500'>Not found</p>".to_string())
+    }
+}
+
+pub async fn channel_row(Path(id): Path<i32>) -> impl IntoResponse {
+    let conn = &mut db::establish_connection();
+    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
+    if let Some(channel) = channels.into_iter().find(|c| c.id == id) {
+        let template = ChannelRowTemplate { channel };
+        render_template!(template)
+    } else {
+        Html(String::new())
+    }
+}
+
 fn spawn_feed_refresh(state: AppState, channel_id: i32) {
     tokio::spawn(async move {
         info!("Spawning feed refresh for channel with ID {}", channel_id);
@@ -137,3 +130,4 @@ fn spawn_feed_refresh(state: AppState, channel_id: i32) {
         }
     });
 }
+

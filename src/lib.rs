@@ -1,5 +1,6 @@
 pub mod handlers {
-    pub mod channel_handler;
+    pub mod channel_api_handler;
+    pub mod channel_page_handler;
     pub mod error_handler;
     pub mod index_handler;
     pub mod ws_handler;

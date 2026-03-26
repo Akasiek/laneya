@@ -1,22 +1,22 @@
+use crate::app_state::AppState;
+use crate::handlers::channel_api_handler::{
+    add_channel, channel_row, delete_channel, edit_channel_form, update_channel,
+};
+use crate::handlers::channel_page_handler::channels_page;
+use crate::handlers::index_handler::index;
+use crate::handlers::ws_handler::ws_handler;
 use axum::Router;
 use axum::extract::MatchedPath;
 use axum::http::Request;
-use axum::routing::{get, put};
+use axum::routing::{get, post, put};
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 use tracing::info_span;
-use crate::app_state::AppState;
-use crate::handlers::channel_handler::{add_channel, channel_row, channels_page, delete_channel, edit_channel_form, update_channel};
-use crate::handlers::index_handler::index;
-use crate::handlers::ws_handler::ws_handler;
 
 pub fn get_app_router(state: AppState) -> Router {
     Router::new()
-        .route("/", get(index))
-        .route("/channels", get(channels_page).post(add_channel))
-        .route("/channels/{id}", put(update_channel).delete(delete_channel))
-        .route("/channels/{id}/edit", get(edit_channel_form))
-        .route("/channels/{id}/row", get(channel_row))
+        .merge(pages_router())
+        .nest("/channels", channels_router())
         .route("/ws", get(ws_handler))
         .nest_service("/static", ServeDir::new("templates/static"))
         .with_state(state)
@@ -35,4 +35,20 @@ pub fn get_app_router(state: AppState) -> Router {
                 )
             }),
         )
+}
+
+/// Routes that render full pages navigated to by the user.
+fn pages_router() -> Router<AppState> {
+    Router::new()
+        .route("/", get(index))
+        .route("/channels", get(channels_page))
+}
+
+/// Routes used internally by HTMX for fragments and channel mutations.
+fn channels_router() -> Router<AppState> {
+    Router::new()
+        .route("/", post(add_channel))
+        .route("/{id}", put(update_channel).delete(delete_channel))
+        .route("/{id}/edit", get(edit_channel_form))
+        .route("/{id}/row", get(channel_row))
 }
