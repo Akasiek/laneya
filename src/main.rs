@@ -1,5 +1,5 @@
-use laneya::app_state::AppState;
 use laneya::{scheduler, tracer, web_server};
+use laneya::app_state::AppState;
 
 #[tokio::main]
 async fn main() {

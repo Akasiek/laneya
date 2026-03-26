@@ -1,4 +1,3 @@
-pub mod app_state;
 pub mod handlers {
     pub mod channel_handler;
     pub mod error_handler;
@@ -16,6 +15,8 @@ pub mod repositories {
 pub mod services {
     pub mod feed_reader_service;
 }
+pub mod app_state;
+pub mod config;
 pub mod db;
 pub mod macros;
 pub mod router;

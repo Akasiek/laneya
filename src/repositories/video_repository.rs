@@ -13,9 +13,13 @@ impl VideoRepository {
         channel_db_id: i32,
         feed: &YoutubeFeed,
     ) -> anyhow::Result<bool> {
+        let filter_shorts = crate::config::Config::get().filter_shorts;
         let mut changed = false;
 
         for entry in &feed.entries {
+            if filter_shorts && entry.link.href.starts_with("https://www.youtube.com/shorts/") {
+                continue;
+            }
             let existing: Option<(String, String)> = videos::table
                 .filter(videos::video_id.eq(&entry.video_id))
                 .select((videos::title, videos::updated_at))
