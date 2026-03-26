@@ -48,7 +48,7 @@ pub fn parse_feed(xml: &str) -> Result<YoutubeFeed, quick_xml::DeError> {
     quick_xml::de::from_str(xml)
 }
 
-pub async fn validate_channel_id(channel_id: &str) -> Result<(), String> {
+pub async fn fetch_channel_name(channel_id: &str) -> Result<String, String> {
     let url = format!("{}{}", YOUTUBE_FEED_URL, channel_id);
     let client = Client::new();
 
@@ -57,7 +57,7 @@ pub async fn validate_channel_id(channel_id: &str) -> Result<(), String> {
         .map_err(|e| format!("Could not reach YouTube: {}", e))?;
 
     parse_feed(&xml)
-        .map(|_| ())
+        .map(|feed| feed.title)
         .map_err(|_| format!("'{}' is not a valid YouTube channel ID.", channel_id))
 }
 

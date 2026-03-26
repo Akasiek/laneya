@@ -10,13 +10,13 @@ use crate::db;
 use crate::models::channel::NewChannel;
 use crate::render_template;
 use crate::repositories::channel_repository::ChannelRepository;
-use crate::services::feed_reader_service::validate_channel_id;
+use crate::services::feed_reader_service::fetch_channel_name;
 use crate::templates::{ChannelEditRowTemplate, ChannelRowTemplate};
 
 #[derive(Deserialize)]
 pub struct ChannelForm {
     pub channel_id: String,
-    pub channel_name: String,
+    pub channel_name: Option<String>,
 }
 
 pub async fn add_channel(
@@ -24,15 +24,15 @@ pub async fn add_channel(
     Form(form): Form<ChannelForm>,
 ) -> impl IntoResponse {
     let channel_id = form.channel_id.trim().to_string();
-    let channel_name = form.channel_name.trim().to_string();
 
-    if channel_id.is_empty() || channel_name.is_empty() {
-        return Html(r#"<p class="text-red-500 text-sm">Channel ID and name are required.</p>"#.to_string()).into_response();
+    if channel_id.is_empty() {
+        return Html(r#"<p class="text-red-500 text-sm">Channel ID is required.</p>"#.to_string()).into_response();
     }
 
-    if let Err(e) = validate_channel_id(&channel_id).await {
-        return Html(format!(r#"<p class="text-red-500 text-sm">{e}</p>"#)).into_response();
-    }
+    let channel_name = match fetch_channel_name(&channel_id).await {
+        Ok(name) => name,
+        Err(e) => return Html(format!(r#"<p class="text-red-500 text-sm">{e}</p>"#)).into_response(),
+    };
 
     let conn = &mut db::establish_connection();
     match ChannelRepository::create(conn, NewChannel { channel_id, channel_name }) {
@@ -55,9 +55,9 @@ pub async fn update_channel(
     Form(form): Form<ChannelForm>,
 ) -> Html<String> {
     let channel_id = form.channel_id.trim().to_string();
-    let channel_name = form.channel_name.trim().to_string();
+    let channel_name = form.channel_name.as_deref().unwrap_or("").trim().to_string();
 
-    let validation_error = validate_channel_id(&channel_id).await.err();
+    let validation_error = fetch_channel_name(&channel_id).await.err();
 
     let conn = &mut db::establish_connection();
 
