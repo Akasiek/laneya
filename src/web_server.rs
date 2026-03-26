@@ -25,6 +25,9 @@ pub async fn get_app_listener() -> TcpListener {
             TcpListener::from_std(listener).unwrap()
         }
         // otherwise fall back to local listening
-        None => TcpListener::bind("127.0.0.1:8080").await.unwrap(),
+        None => {
+            let host = std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
+            TcpListener::bind(host).await.unwrap()
+        }
     }
 }
