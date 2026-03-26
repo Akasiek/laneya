@@ -1,0 +1,4 @@
+/target
+/templates/node_modules
+.idea
+database.db
