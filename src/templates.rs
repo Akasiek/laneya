@@ -1,6 +1,6 @@
 use askama::Template;
 use crate::models::channel::Channel;
-use crate::models::video::Video;
+use crate::models::video::VideoResource;
 
 #[derive(Template)]
 #[template(path = "pages/index.html")]
@@ -9,7 +9,7 @@ pub struct IndexTemplate {}
 #[derive(Template)]
 #[template(path = "components/video_grid.html")]
 pub struct VideoGridTemplate {
-    pub videos: Vec<Video>,
+    pub videos: Vec<VideoResource>,
 }
 
 #[derive(Template)]

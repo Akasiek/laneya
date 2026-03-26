@@ -1,0 +1,24 @@
+<div class="group relative rounded-lg overflow-hidden hover:scale-103 active:scale-97 bg-white dark:bg-zinc-900 transition duration-200">
+
+    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="w-full aspect-video object-cover"/>
+
+    <div class="p-3 flex flex-col justify-between h-fit">
+        <div class="group-hover:text-amber-500 dark:group-hover:text-amber-400 transition">
+            <h2 class="font-semibold text-sm line-clamp-2">
+                <a target="_blank"
+                   href="{{ video.video_url }}"
+                   class="after:absolute after:inset-0 after:content-['']"
+                >{{ video.title }}</a>
+            </h2>
+            <div class="flex justify-between items-end mt-2">
+                <a class="relative z-10 text-xs text-zinc-500 dark:text-zinc-400 mt-1 hover:text-amber-500 dark:hover:text-amber-400 transition"
+                   href="https://www.youtube.com/channel/{{ video.channel_id }}"
+                   target="_blank"
+                >
+                    {{ video.channel_name }}
+                </a>
+                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{{ video.published_at }}</p>
+            </div>
+        </div>
+    </div>
+</div>

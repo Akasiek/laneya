@@ -28,3 +28,15 @@ pub struct NewVideo {
     pub updated_at: String,
 }
 
+#[derive(Queryable)]
+pub struct VideoResource {
+    pub id: i32,
+    pub video_id: String,
+    pub title: String,
+    pub video_url: String,
+    pub thumbnail_url: String,
+    /// Human-readable date, e.g. "26 Mar 2026".
+    pub published_at: String,
+    pub channel_id: String,
+    pub channel_name: String,
+}

@@ -1,17 +1,6 @@
 <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     {% for video in videos %}
-    <a href="{{ video.video_url }}" target="_blank"
-       class="group block rounded-lg overflow-hidden shadow hover:shadow-lg dark:shadow-zinc-800 bg-white dark:bg-zinc-900 transition">
-        <img src="{{ video.thumbnail_url }}"
-             alt="{{ video.title }}"
-             class="w-full aspect-video object-cover" />
-        <div class="p-3">
-            <h2 class="font-semibold text-sm line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">
-                {{ video.title }}
-            </h2>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ video.published_at }}</p>
-        </div>
-    </a>
+        {% include "components/video_card.html" %}
     {% endfor %}
 </div>
 
