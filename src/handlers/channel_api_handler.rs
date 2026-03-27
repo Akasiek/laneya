@@ -1,22 +1,19 @@
 use crate::app_state::AppState;
-use crate::{db, html_error};
 use crate::models::channel::NewChannel;
 use crate::render_template;
 use crate::repositories::channel_repository::ChannelRepository;
-use crate::services::csv_import_service::parse_takeout_csv;
-use crate::services::feed_reader_service;
+use crate::services::csv_import_service::{extract_csv_bytes, parse_takeout_csv};
+use crate::services::{feed_reader_service, ws_service};
 use crate::templates::{ChannelEditRowTemplate, ChannelRowTemplate};
+use crate::{db, html_error};
 use askama::Template;
 use axum::Form;
 use axum::extract::multipart::Multipart;
 use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::response::{Html, IntoResponse, Response};
-use diesel::SqliteConnection;
-use serde::Deserialize;
-use std::collections::HashSet;
-use tracing::info;
 use feed_reader_service::fetch_channel_feed_data;
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct ChannelForm {
@@ -49,10 +46,8 @@ pub async fn add_channel(
         },
     ) {
         Ok(new_id) => {
-            spawn_feed_refresh(state, new_id);
-            let mut headers = HeaderMap::new();
-            headers.insert("HX-Redirect", "/channels".parse().unwrap());
-            (headers, Html(String::new())).into_response()
+            ChannelRepository::spawn_channel_feed_refresh(state, new_id);
+            htmx_redirect("/channels")
         }
         Err(e) => {
             tracing::error!("Failed to add channel: {}", e);
@@ -75,7 +70,6 @@ pub async fn update_channel(
         .to_string();
 
     let validation_error = fetch_channel_feed_data(&channel_id).await.err();
-
     let conn = &mut db::establish_connection();
 
     if let Some(ref e) = validation_error {
@@ -91,7 +85,7 @@ pub async fn update_channel(
 
     match ChannelRepository::update(conn, id, channel_name, channel_id) {
         Ok(_) => {
-            spawn_feed_refresh(state, id);
+            ChannelRepository::spawn_channel_feed_refresh(state, id);
             if let Some(channel) = ChannelRepository::find_by_id(conn, id).unwrap_or_default() {
                 let template = ChannelRowTemplate { channel };
                 render_template!(template)
@@ -110,38 +104,13 @@ pub async fn delete_channel(
     let conn = &mut db::establish_connection();
     match ChannelRepository::delete(conn, id) {
         Ok(_) => {
-            let _ = state.feed_tx.send(());
+            ws_service::send_refresh_notification(state).await;
             Html(String::new()).into_response()
         }
         Err(e) => {
             tracing::error!("Failed to delete channel {}: {}", id, e);
             html_error!("Error: {e}").into_response()
         }
-    }
-}
-
-pub async fn edit_channel_form(Path(id): Path<i32>) -> impl IntoResponse {
-    let conn = &mut db::establish_connection();
-    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
-    if let Some(channel) = channels.into_iter().find(|c| c.id == id) {
-        let template = ChannelEditRowTemplate {
-            channel,
-            error: None,
-        };
-        render_template!(template)
-    } else {
-        Html("<p class='text-red-500'>Not found</p>".to_string())
-    }
-}
-
-pub async fn channel_row(Path(id): Path<i32>) -> impl IntoResponse {
-    let conn = &mut db::establish_connection();
-    let channels = ChannelRepository::find_all(conn).unwrap_or_default();
-    if let Some(channel) = channels.into_iter().find(|c| c.id == id) {
-        let template = ChannelRowTemplate { channel };
-        render_template!(template)
-    } else {
-        Html(String::new())
     }
 }
 
@@ -160,7 +129,7 @@ pub async fn bulk_import_channels(
     };
 
     let conn = &mut db::establish_connection();
-    let (imported, skipped) = match insert_channels_into_db(conn, entries) {
+    let (imported, skipped) = match ChannelRepository::bulk_create(conn, entries) {
         Ok(result) => result,
         Err(e) => return html_error!("{e}").into_response(),
     };
@@ -169,69 +138,31 @@ pub async fn bulk_import_channels(
         return html_error!("All {skipped} channel(s) are already in your list.").into_response();
     }
 
-    tokio::spawn(async move {
-        if ChannelRepository::fetch_all_feeds().await {
-            let _ = state.feed_tx.send(());
-        }
-    });
-
+    ChannelRepository::spawn_all_feeds_refresh(state).await;
     htmx_redirect("/channels")
 }
 
-fn spawn_feed_refresh(state: AppState, channel_id: i32) {
-    tokio::spawn(async move {
-        info!("Spawning feed refresh for channel with ID {}", channel_id);
-        if ChannelRepository::fetch_feed_for_channel(channel_id).await {
-            let _ = state.feed_tx.send(());
-        }
-    });
+pub async fn render_edit_channel_form(Path(id): Path<i32>) -> impl IntoResponse {
+    let conn = &mut db::establish_connection();
+    if let Some(channel) = ChannelRepository::find_by_id(conn, id).unwrap_or_default() {
+        let template = ChannelEditRowTemplate {
+            channel,
+            error: None,
+        };
+        render_template!(template)
+    } else {
+        Html("<p class='text-red-500'>Not found</p>".to_string())
+    }
 }
 
-async fn extract_csv_bytes(multipart: &mut Multipart) -> Result<Vec<u8>, Response> {
-    while let Ok(Some(field)) = multipart.next_field().await {
-        if field.name().unwrap_or("") == "csv_file" {
-            return field
-                .bytes()
-                .await
-                .map(|b| b.to_vec())
-                .map_err(|e| html_error!("Failed to read file: {e}").into_response());
-        }
+pub async fn render_channel_row(Path(id): Path<i32>) -> impl IntoResponse {
+    let conn = &mut db::establish_connection();
+    if let Some(channel) = ChannelRepository::find_by_id(conn, id).unwrap_or_default() {
+        let template = ChannelRowTemplate { channel };
+        render_template!(template)
+    } else {
+        Html(String::new())
     }
-    Err(html_error!("No CSV file provided.").into_response())
-}
-
-/// Filters out already-existing channels, then bulk-inserts the rest in a
-/// single transaction. Returns `(imported_count, skipped_count)` on success.
-fn insert_channels_into_db(
-    conn: &mut SqliteConnection,
-    entries: Vec<NewChannel>,
-) -> Result<(u32, u32), String> {
-    let existing: HashSet<String> = ChannelRepository::find_all(conn)
-        .unwrap_or_default()
-        .into_iter()
-        .map(|c| c.channel_id)
-        .collect();
-
-    let mut skipped = 0u32;
-    let to_insert: Vec<NewChannel> = entries
-        .into_iter()
-        .filter(|e| {
-            if existing.contains(&e.channel_id) {
-                skipped += 1;
-                false
-            } else {
-                true
-            }
-        })
-        .collect();
-
-    if to_insert.is_empty() {
-        return Ok((0, skipped));
-    }
-
-    ChannelRepository::bulk_create(conn, &to_insert)
-        .map(|imported| (imported, skipped))
-        .map_err(|e| format!("Bulk insert failed: {e}"))
 }
 
 fn htmx_redirect(path: &str) -> Response {

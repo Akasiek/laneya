@@ -1,3 +1,6 @@
+use axum::extract::Multipart;
+use axum::response::{IntoResponse, Response};
+use crate::html_error;
 use crate::models::channel::NewChannel;
 
 /// Parses a Google Takeout YouTube subscriptions CSV (bytes) and returns the
@@ -46,4 +49,17 @@ pub fn parse_takeout_csv(bytes: &[u8]) -> anyhow::Result<Vec<NewChannel>> {
     }
 
     Ok(channels)
+}
+
+pub async fn extract_csv_bytes(multipart: &mut Multipart) -> Result<Vec<u8>, Response> {
+    while let Ok(Some(field)) = multipart.next_field().await {
+        if field.name().unwrap_or("") == "csv_file" {
+            return field
+                .bytes()
+                .await
+                .map(|b| b.to_vec())
+                .map_err(|e| html_error!("Failed to read file: {e}").into_response());
+        }
+    }
+    Err(html_error!("No CSV file provided.").into_response())
 }

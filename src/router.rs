@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::handlers::channel_api_handler::{
-    add_channel, bulk_import_channels, channel_row, delete_channel, edit_channel_form,
+    add_channel, bulk_import_channels, render_channel_row, delete_channel, render_edit_channel_form,
     update_channel,
 };
 use crate::handlers::channel_page_handler::channels_page;
@@ -53,8 +53,8 @@ fn channels_router() -> Router<AppState> {
         .route("/", post(add_channel))
         .route("/bulk-import", post(bulk_import_channels))
         .route("/{id}", put(update_channel).delete(delete_channel))
-        .route("/{id}/edit", get(edit_channel_form))
-        .route("/{id}/row", get(channel_row))
+        .route("/{id}/edit", get(render_edit_channel_form))
+        .route("/{id}/row", get(render_channel_row))
 }
 
 /// Routes used internally by HTMX for video fragments.

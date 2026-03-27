@@ -17,6 +17,7 @@ pub mod repositories {
 pub mod services {
     pub mod csv_import_service;
     pub mod feed_reader_service;
+    pub mod ws_service;
 }
 pub mod app_state;
 pub mod config;
