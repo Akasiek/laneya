@@ -15,6 +15,7 @@ pub mod repositories {
     pub mod video_repository;
 }
 pub mod services {
+    pub mod csv_import_service;
     pub mod feed_reader_service;
 }
 pub mod app_state;

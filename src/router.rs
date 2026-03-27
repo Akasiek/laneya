@@ -1,6 +1,7 @@
 use crate::app_state::AppState;
 use crate::handlers::channel_api_handler::{
-    add_channel, channel_row, delete_channel, edit_channel_form, update_channel,
+    add_channel, bulk_import_channels, channel_row, delete_channel, edit_channel_form,
+    update_channel,
 };
 use crate::handlers::channel_page_handler::channels_page;
 use crate::handlers::index_handler::index;
@@ -50,6 +51,7 @@ fn pages_router() -> Router<AppState> {
 fn channels_router() -> Router<AppState> {
     Router::new()
         .route("/", post(add_channel))
+        .route("/bulk-import", post(bulk_import_channels))
         .route("/{id}", put(update_channel).delete(delete_channel))
         .route("/{id}/edit", get(edit_channel_form))
         .route("/{id}/row", get(channel_row))
