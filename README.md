@@ -6,7 +6,7 @@
 
 ## Name definition
 
-**lanéya** - Q. adverb. _recently, not long ago_
+**lanéya** - Quenya _adverb._ recently, not long ago
 
 | Element | Gloss                                |
 |---------|--------------------------------------|
