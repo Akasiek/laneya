@@ -1,6 +1,6 @@
 <tr id="channel-row-{{ channel.id }}" class="bg-amber-50 dark:bg-amber-900/10">
     <td class="px-4 py-2" colspan="4">
-        <form hx-put="/channels/{{ channel.id }}"
+        <form hx-put="/api/channels/{{ channel.id }}"
               hx-target="#channel-row-{{ channel.id }}"
               hx-swap="outerHTML"
               class="flex flex-wrap gap-2 items-center">
@@ -23,7 +23,7 @@
             </button>
 
             <button type="button"
-                    hx-get="/channels/{{ channel.id }}/row"
+                    hx-get="/api/channels/{{ channel.id }}/row"
                     hx-target="#channel-row-{{ channel.id }}"
                     hx-swap="outerHTML"
                     class="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-medium transition">

@@ -18,8 +18,8 @@ use tracing::info_span;
 pub fn get_app_router(state: AppState) -> Router {
     Router::new()
         .merge(pages_router())
-        .nest("/channels", channels_router())
-        .nest("/videos", videos_router())
+        .nest("/api/channels", channels_router())
+        .nest("/api/videos", videos_router())
         .route("/ws", get(ws_handler))
         .nest_service("/static", ServeDir::new("templates/static"))
         .with_state(state)

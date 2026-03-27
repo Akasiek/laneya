@@ -6,7 +6,7 @@
     <td class="px-4 py-3 align-middle">
         <div class="flex gap-2 justify-end">
             <button
-                hx-get="/channels/{{ channel.id }}/edit"
+                hx-get="/api/channels/{{ channel.id }}/edit"
                 hx-target="#channel-row-{{ channel.id }}"
                 hx-swap="outerHTML"
                 class="px-3 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200
@@ -15,7 +15,7 @@
                 Edit
             </button>
             <button
-                hx-delete="/channels/{{ channel.id }}"
+                hx-delete="/api/channels/{{ channel.id }}"
                 hx-target="#channel-row-{{ channel.id }}"
                 hx-swap="outerHTML"
                 hx-confirm="Delete {{ channel.channel_name }}?"
