@@ -9,6 +9,6 @@ async fn main() {
     db::init();
 
     let state = AppState::new();
-    scheduler::start_feed_refresh_job(state.feed_tx.clone());
+    scheduler::spawn_feed_refresh_job(state.feed_tx.clone());
     web_server::init(state).await;
 }
