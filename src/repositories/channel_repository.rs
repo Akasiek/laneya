@@ -23,6 +23,25 @@ impl ChannelRepository {
         Ok(new_id)
     }
 
+    pub fn bulk_create(
+        conn: &mut SqliteConnection,
+        new_channels: &[NewChannel],
+    ) -> anyhow::Result<u32> {
+        use crate::schema::channels::dsl::*;
+        conn.transaction(|conn| {
+            new_channels
+                .iter()
+                .map(|ch| {
+                    diesel::insert_into(channels)
+                        .values(ch)
+                        .execute(conn)
+                })
+                .collect::<QueryResult<Vec<_>>>()
+        })
+        .map(|v| v.len() as u32)
+        .map_err(anyhow::Error::from)
+    }
+
     pub fn update(
         conn: &mut SqliteConnection,
         channel_id_pk: i32,

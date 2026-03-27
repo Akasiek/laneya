@@ -29,14 +29,21 @@
         Import
     </button>
 
-    <div class="text-zinc-500 dark:text-zinc-400 text-sm mt-2 w-full">
-        Upload the <code class="font-mono bg-zinc-200 dark:bg-zinc-700 px-1 rounded">subscriptions.csv</code>
-        file from a
-        <a href="https://takeout.google.com"
-           target="_blank"
-           class="underline hover:text-amber-500 dark:hover:text-amber-400 transition">
-            YouTube Google Takeout export</a>
-        (<em>subscriptions</em> folder inside the Takeout archive).
+    <div class="text-zinc-500 dark:text-zinc-400 text-sm mt-2 w-full space-y-2">
+        <p>
+            Upload the <code class="font-mono bg-zinc-200 dark:bg-zinc-700 px-1 rounded">subscriptions.csv</code>
+            file from a
+            <a href="https://takeout.google.com"
+               target="_blank"
+               class="underline hover:text-amber-500 dark:hover:text-amber-400 transition">
+                YouTube Google Takeout export</a>
+            (<em>subscriptions</em> folder inside the Takeout archive).
+        </p>
+        <p>
+            Fetching feeds after import can take some time, especially if you have many subscriptions.
+            Please be patient while the import is in progress.
+        </p>
     </div>
+
     <div id="bulk-feedback" class="w-full"></div>
 </form>
