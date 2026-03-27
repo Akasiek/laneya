@@ -2,8 +2,11 @@ use crate::models::channel::Channel;
 use reqwest::Client;
 use serde::Deserialize;
 use std::sync::Arc;
+use std::time::Duration;
+use tokio::time::sleep;
 
 const YOUTUBE_FEED_URL: &str = "https://www.youtube.com/feeds/videos.xml?channel_id=";
+const FEED_FETCH_DELAY: Duration = Duration::from_millis(300);
 
 #[derive(Debug, Deserialize)]
 #[serde(rename = "feed")]
@@ -65,25 +68,21 @@ pub async fn read_channels_feed(
     channels: Vec<Channel>,
     client: Arc<Client>,
 ) -> Vec<(Channel, Option<YoutubeFeed>)> {
-    let mut set = tokio::task::JoinSet::new();
+    let mut results = Vec::with_capacity(channels.len());
 
-    for channel in channels {
-        let client = Arc::clone(&client);
-        set.spawn(async move {
-            match read_channel_feed(&channel, &client).await {
-                Ok(feed_data) => (channel, Some(feed_data)),
-                Err(e) => {
-                    tracing::error!("Failed to fetch feed for channel {}: {}", channel.id, e);
-                    (channel, None)
-                }
+    for (i, channel) in channels.into_iter().enumerate() {
+        // Throttle requests — fire them one at a time with a short pause so
+        // YouTube does not respond with 403 due to too many rapid requests.
+        if i > 0 {
+            sleep(FEED_FETCH_DELAY).await;
+        }
+
+        match read_channel_feed(&channel, &client).await {
+            Ok(feed) => results.push((channel, Some(feed))),
+            Err(e) => {
+                tracing::error!("Failed to fetch feed for channel {}: {}", channel.id, e);
+                results.push((channel, None));
             }
-        });
-    }
-
-    let mut results = Vec::new();
-    while let Some(result) = set.join_next().await {
-        if let Ok(pair) = result {
-            results.push(pair);
         }
     }
 
@@ -104,8 +103,23 @@ pub fn create_feed_url(channel: &Channel) -> String {
     format!("{}{}", YOUTUBE_FEED_URL, channel.channel_id)
 }
 
-pub async fn fetch_feed_data(feed_url: &str, client: &Client) -> Result<String, reqwest::Error> {
+pub async fn fetch_feed_data(feed_url: &str, client: &Client) -> anyhow::Result<String> {
     let response = client.get(feed_url).send().await?;
-    let body = response.text().await?;
-    Ok(body)
+
+    let status = response.status();
+    if status == reqwest::StatusCode::FORBIDDEN {
+        tracing::warn!(
+            "YouTube returned 403 for {feed_url} - being rate limited. \
+             Consider increasing FEED_REFRESH_INTERVAL_MINS."
+        );
+        anyhow::bail!(
+            "YouTube is rate limiting requests (403 Forbidden). \
+             Try again later or increase FEED_REFRESH_INTERVAL_MINS."
+        );
+    }
+    if !status.is_success() {
+        anyhow::bail!("YouTube returned HTTP {status} for {feed_url}");
+    }
+
+    Ok(response.text().await?)
 }
