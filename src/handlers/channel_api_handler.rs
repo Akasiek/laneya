@@ -16,6 +16,7 @@ use diesel::SqliteConnection;
 use serde::Deserialize;
 use std::collections::HashSet;
 use tracing::info;
+use feed_reader_service::fetch_channel_feed_data;
 
 #[derive(Deserialize)]
 pub struct ChannelForm {
@@ -32,8 +33,8 @@ pub async fn add_channel(
         return html_error!("Channel ID is required.").into_response();
     }
 
-    let channel_name = match feed_reader_service::fetch_channel_name(&channel_id).await {
-        Ok(name) => name,
+    let channel_name = match fetch_channel_feed_data(&channel_id).await {
+        Ok(feed) => feed.title,
         Err(e) => {
             return html_error!("{e}").into_response();
         }
@@ -73,7 +74,7 @@ pub async fn update_channel(
         .trim()
         .to_string();
 
-    let validation_error = feed_reader_service::fetch_channel_name(&channel_id).await.err();
+    let validation_error = fetch_channel_feed_data(&channel_id).await.err();
 
     let conn = &mut db::establish_connection();
 
