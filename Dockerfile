@@ -41,6 +41,7 @@ EXPOSE 8080
 
 ENV DATABASE_URL=/data/database.db
 ENV HOST=0.0.0.0:8080
+ENV TZ=UTC
 
 CMD ["./laneya"]
 

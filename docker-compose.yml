@@ -7,6 +7,8 @@ services:
     volumes:
       - laneya_data:/data
     environment:
+      # Timezone for videos timestamps
+      TZ: "UTC"
       # Set to true to skip YouTube Shorts
       FILTER_OUT_SHORTS: "true"
       # Number of videos to show per page
