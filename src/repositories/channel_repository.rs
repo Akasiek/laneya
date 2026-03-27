@@ -31,11 +31,7 @@ impl ChannelRepository {
         conn.transaction(|conn| {
             new_channels
                 .iter()
-                .map(|ch| {
-                    diesel::insert_into(channels)
-                        .values(ch)
-                        .execute(conn)
-                })
+                .map(|ch| diesel::insert_into(channels).values(ch).execute(conn))
                 .collect::<QueryResult<Vec<_>>>()
         })
         .map(|v| v.len() as u32)
