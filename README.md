@@ -27,7 +27,28 @@
 
 ---
 
-## Running with Docker
+## Deploying with Docker
+
+```yaml
+services:
+  laneya:
+    image: ghcr.io/Akasiek/laneya:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - laneya_data:/data
+    environment:
+      TZ: "UTC"
+      FILTER_OUT_SHORTS: "true"
+      VIDEOS_PER_PAGE: "24"
+      FEED_REFRESH_INTERVAL_MINS: "5"
+
+volumes:
+  laneya_data:
+```
+
+Save the above as `compose.yaml`, then run:
 
 ```bash
 docker compose up -d
@@ -35,7 +56,7 @@ docker compose up -d
 
 The app will be available at **http://localhost:8080**.
 
-Data is stored in the `laneya_data` Docker volume.
+Data is stored in the `laneya_data` Docker volume which can be changed if needed.
 
 ### Environment variables
 
