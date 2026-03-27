@@ -1,10 +1,10 @@
 use crate::app_state::AppState;
-use crate::db;
+use crate::{db, html_error};
 use crate::models::channel::NewChannel;
 use crate::render_template;
 use crate::repositories::channel_repository::ChannelRepository;
 use crate::services::csv_import_service::parse_takeout_csv;
-use crate::services::feed_reader_service::fetch_channel_name;
+use crate::services::feed_reader_service;
 use crate::templates::{ChannelEditRowTemplate, ChannelRowTemplate};
 use askama::Template;
 use axum::Form;
@@ -28,16 +28,14 @@ pub async fn add_channel(
     Form(form): Form<ChannelForm>,
 ) -> impl IntoResponse {
     let channel_id = form.channel_id.trim().to_string();
-
     if channel_id.is_empty() {
-        return Html(r#"<p class="text-red-500 text-sm">Channel ID is required.</p>"#.to_string())
-            .into_response();
+        return html_error!("Channel ID is required.").into_response();
     }
 
-    let channel_name = match fetch_channel_name(&channel_id).await {
+    let channel_name = match feed_reader_service::fetch_channel_name(&channel_id).await {
         Ok(name) => name,
         Err(e) => {
-            return Html(format!(r#"<p class="text-red-500 text-sm">{e}</p>"#)).into_response();
+            return html_error!("{e}").into_response();
         }
     };
 
@@ -57,7 +55,7 @@ pub async fn add_channel(
         }
         Err(e) => {
             tracing::error!("Failed to add channel: {}", e);
-            Html(format!(r#"<p class="text-red-500 text-sm">Error: {e}</p>"#)).into_response()
+            html_error!("Error: {e}").into_response()
         }
     }
 }
@@ -75,7 +73,7 @@ pub async fn update_channel(
         .trim()
         .to_string();
 
-    let validation_error = fetch_channel_name(&channel_id).await.err();
+    let validation_error = feed_reader_service::fetch_channel_name(&channel_id).await.err();
 
     let conn = &mut db::establish_connection();
 
@@ -87,7 +85,7 @@ pub async fn update_channel(
             };
             return render_template!(template);
         }
-        return Html(format!(r#"<p class="text-red-500 text-sm">{e}</p>"#));
+        return html_error!("{e}");
     }
 
     match ChannelRepository::update(conn, id, channel_name, channel_id) {
@@ -100,7 +98,7 @@ pub async fn update_channel(
                 Html(String::new())
             }
         }
-        Err(e) => Html(format!(r#"<p class="text-red-500 text-sm">Error: {e}</p>"#)),
+        Err(e) => Html(html_error!("Error: {e}").0),
     }
 }
 
@@ -116,7 +114,7 @@ pub async fn delete_channel(
         }
         Err(e) => {
             tracing::error!("Failed to delete channel {}: {}", id, e);
-            Html(format!(r#"<p class="text-red-500 text-sm">Error: {e}</p>"#)).into_response()
+            html_error!("Error: {e}").into_response()
         }
     }
 }
@@ -157,19 +155,17 @@ pub async fn bulk_import_channels(
 
     let entries = match parse_takeout_csv(&csv_bytes) {
         Ok(e) => e,
-        Err(e) => return html_error(format!("Invalid CSV: {e}")),
+        Err(e) => return html_error!("Invalid CSV: {e}").into_response(),
     };
 
     let conn = &mut db::establish_connection();
     let (imported, skipped) = match insert_channels_into_db(conn, entries) {
         Ok(result) => result,
-        Err(e) => return html_error(e),
+        Err(e) => return html_error!("{e}").into_response(),
     };
 
     if imported == 0 {
-        return html_error(format!(
-            "All {skipped} channel(s) are already in your list."
-        ));
+        return html_error!("All {skipped} channel(s) are already in your list.").into_response();
     }
 
     tokio::spawn(async move {
@@ -197,10 +193,10 @@ async fn extract_csv_bytes(multipart: &mut Multipart) -> Result<Vec<u8>, Respons
                 .bytes()
                 .await
                 .map(|b| b.to_vec())
-                .map_err(|e| html_error(format!("Failed to read file: {e}")));
+                .map_err(|e| html_error!("Failed to read file: {e}").into_response());
         }
     }
-    Err(html_error("No CSV file provided."))
+    Err(html_error!("No CSV file provided.").into_response())
 }
 
 /// Filters out already-existing channels, then bulk-inserts the rest in a
@@ -235,10 +231,6 @@ fn insert_channels_into_db(
     ChannelRepository::bulk_create(conn, &to_insert)
         .map(|imported| (imported, skipped))
         .map_err(|e| format!("Bulk insert failed: {e}"))
-}
-
-fn html_error(msg: impl std::fmt::Display) -> Response {
-    Html(format!(r#"<p class="text-red-500 text-sm">{msg}</p>"#)).into_response()
 }
 
 fn htmx_redirect(path: &str) -> Response {

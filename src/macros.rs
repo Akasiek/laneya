@@ -7,3 +7,13 @@ macro_rules! render_template {
         }
     }};
 }
+
+#[macro_export]
+macro_rules! html_error {
+    ($($arg:tt)+) => {
+        axum::response::Html(format!(
+            r#"<p class="text-red-500 text-sm">{}</p>"#,
+            format_args!($($arg)+)
+        ))
+    };
+}
