@@ -25,13 +25,13 @@ pub struct ChannelsTemplate {
 }
 
 #[derive(Template)]
-#[template(path = "components/channel_row.html")]
+#[template(path = "components/channel/row.html")]
 pub struct ChannelRowTemplate {
     pub channel: Channel,
 }
 
 #[derive(Template)]
-#[template(path = "components/channel_edit_row.html")]
+#[template(path = "components/channel/edit_row.html")]
 pub struct ChannelEditRowTemplate {
     pub channel: Channel,
     pub error: Option<String>,

@@ -1,0 +1,41 @@
+<form hx-post="/channels"
+      hx-target="#add-feedback"
+      hx-swap="innerHTML"
+      class="flex flex-wrap gap-2 items-start mb-8 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800
+      bg-zinc-50 dark:bg-zinc-900">
+
+    <label
+        class="w-full text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1"
+        for="channel_id"
+    >
+        Add Channel
+    </label>
+    <input
+        type="text"
+        id="channel_id"
+        name="channel_id"
+        placeholder="Channel ID (e.g. UCxxxxxxxx)"
+        required
+        class="px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800
+            text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 w-64"
+    />
+
+    <button
+        type="submit"
+        class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition
+            border border-amber-500 hover:border-amber-600"
+    >
+        + Add
+    </button>
+
+    <div class="text-zinc-500 dark:text-zinc-400 text-sm mt-2 w-full">
+        For information on how to find a channel ID, see
+        <a
+            target="_blank"
+            href="https://codeberg.org/Akasiek/laneya/src/branch/main/README.md"
+            class="underline hover:text-amber-500 dark:hover:text-amber-400 transition"
+        > project README</a>.
+    </div>
+
+    <div id="add-feedback" class="w-full"></div>
+</form>
