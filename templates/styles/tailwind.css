@@ -278,6 +278,9 @@
   .aspect-video {
     aspect-ratio: var(--aspect-video);
   }
+  .h-full {
+    height: 100%;
+  }
   .w-44 {
     width: calc(var(--spacing) * 44);
   }
