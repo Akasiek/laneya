@@ -9,7 +9,7 @@ pub struct ChannelRepository;
 impl ChannelRepository {
     pub fn find_all(conn: &mut SqliteConnection) -> anyhow::Result<Vec<Channel>> {
         use crate::schema::channels::dsl::*;
-        let result = channels.load::<Channel>(conn)?;
+        let result = channels.order(channel_name.asc()).load::<Channel>(conn)?;
         Ok(result)
     }
 
