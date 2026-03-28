@@ -31,9 +31,9 @@ FROM alpine:3.23
 RUN apk upgrade --no-cache \
  && apk add --no-cache sqlite-libs ca-certificates tzdata
 
-# Create a non-root system user with no home dir and no login shell
-RUN addgroup -S laneya \
- && adduser -S -G laneya -H -s /sbin/nologin laneya
+# Create a non-root system user with fixed UID/GID 1000 (matches typical host user)
+RUN addgroup -S -g 1000 laneya \
+ && adduser -S -G laneya -u 1000 -H -s /sbin/nologin laneya
 
 WORKDIR /app
 
@@ -51,8 +51,9 @@ EXPOSE 8080
 ENV DATABASE_URL=/data/database.db
 ENV HOST=0.0.0.0:8080
 ENV TZ=UTC
+ENV CARGO_CRATE_NAME=laneya
+ENV RUST_LOG=laneya=info,tower_http=info,axum::rejection=trace
 
 USER laneya
 
 CMD ["./laneya"]
-
