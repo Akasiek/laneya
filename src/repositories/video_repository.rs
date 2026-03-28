@@ -151,9 +151,9 @@ impl VideoRepository {
 
     pub fn delete_by_channel_id(
         conn: &mut SqliteConnection,
-        channel_db_id: i32,
+        channel_id: i32,
     ) -> anyhow::Result<()> {
-        diesel::delete(videos::table.filter(videos::channel_id.eq(channel_db_id))).execute(conn)?;
+        diesel::delete(videos::table.filter(videos::channel_id.eq(channel_id))).execute(conn)?;
         Ok(())
     }
 }
