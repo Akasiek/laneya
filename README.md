@@ -33,7 +33,7 @@
 ```yaml
 services:
   laneya:
-    image: ghcr.io/Akasiek/laneya:latest
+    image: ghcr.io/akasiek/laneya:latest
     restart: unless-stopped
     ports:
       - "8080:8080"
