@@ -115,13 +115,9 @@ impl VideoRepository {
         page: i64,
     ) -> anyhow::Result<(Vec<VideoResource>, i64)> {
         let per_page = Config::get().videos_per_page;
+        let (total_pages, offset) = Self::get_video_pagination_info(conn, page, per_page);
 
-        let total: i64 = videos::table.count().get_result(conn)?;
-        let total_pages = ((total + per_page - 1) / per_page).max(1);
-        let page = page.clamp(1, total_pages);
-        let offset = (page - 1) * per_page;
-
-        let rows = videos::table
+        let mut rows = videos::table
             .inner_join(channels::table)
             .select((
                 videos::id,
@@ -136,17 +132,26 @@ impl VideoRepository {
             .order(videos::published_at.desc())
             .limit(per_page)
             .offset(offset)
-            .load::<VideoResource>(conn)
-            .map(|rows| {
-                rows.into_iter()
-                    .map(|mut v| {
-                        v.published_at = format_published_at(&v.published_at);
-                        v
-                    })
-                    .collect()
-            })?;
+            .load::<VideoResource>(conn)?;
+
+        for v in &mut rows {
+            v.published_at = format_published_at(&v.published_at);
+        }
 
         Ok((rows, total_pages))
+    }
+
+    fn get_video_pagination_info(
+        conn: &mut SqliteConnection,
+        page: i64,
+        per_page: i64,
+    ) -> (i64, i64) {
+        let total: i64 = videos::table.count().get_result(conn).unwrap_or(0);
+        let total_pages = ((total + per_page - 1) / per_page).max(1);
+        let page = page.clamp(1, total_pages);
+        let offset = (page - 1) * per_page;
+
+        (total_pages, offset)
     }
 
     pub fn delete_by_channel_id(
