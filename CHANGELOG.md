@@ -1,9 +1,5 @@
 ## [1.0.1] - 2026-03-28
 
-### 🚀 Features
-
-- Add CHANGELOG and configuration for git-cliff
-
 ### 🐛 Bug Fixes
 
 - Specify Dockerfile path in workflows for build and publish tasks
@@ -15,7 +11,6 @@
 ### 📚 Documentation
 
 - Fix casing in Docker image reference in README
-
 ## [1.0.0] - 2026-03-28
 
 ### 🚀 Features
@@ -44,7 +39,6 @@
 - Improve navigation styling and z-index management
 - Replace Trivy with Docker Scout for CVE scanning
 - Update CodeQL SARIF upload action to version 4
-- Bump version of laneya to 1.0.0
 
 ### 🐛 Bug Fixes
 
