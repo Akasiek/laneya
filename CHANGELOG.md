@@ -1,3 +1,21 @@
+## [1.0.1] - 2026-03-28
+
+### 🚀 Features
+
+- Add CHANGELOG and configuration for git-cliff
+
+### 🐛 Bug Fixes
+
+- Specify Dockerfile path in workflows for build and publish tasks
+
+### 🚜 Refactor
+
+- Reorganize Docker setup with improved structure and user permissions
+
+### 📚 Documentation
+
+- Fix casing in Docker image reference in README
+
 ## [1.0.0] - 2026-03-28
 
 ### 🚀 Features
