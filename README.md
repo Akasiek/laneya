@@ -40,6 +40,9 @@ services:
     volumes:
       - laneya_data:/data
 
+    # If mounting data volume as a path on the host, ensure it has appropriate permissions for the container user.
+    user: "${UID:-1000}:${GID:-1000}"
+
     environment:
       # Timezone for videos timestamps
       TZ: "UTC"
