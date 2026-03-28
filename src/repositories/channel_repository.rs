@@ -6,6 +6,7 @@ use crate::services::feed_reader_service::{read_channel_feed, read_channels_feed
 use crate::services::ws_service;
 use diesel::prelude::*;
 use std::collections::HashSet;
+use std::sync::Arc;
 use tracing::{error, info};
 
 pub struct ChannelRepository;
@@ -162,7 +163,7 @@ impl ChannelRepository {
             Vec::new()
         });
 
-        let client = std::sync::Arc::new(reqwest::Client::new());
+        let client = Arc::new(reqwest::Client::new());
         let results = read_channels_feed(channels_list, client).await;
 
         let mut any_changed = false;
