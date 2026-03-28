@@ -26,6 +26,8 @@ impl ChannelRepository {
         Ok(channel)
     }
 
+    /// Attempts to bulk insert channels, skipping any that already exist based on `channel_id`.
+    /// Returns a tuple of (number_inserted, number_skipped).
     pub fn bulk_create(
         conn: &mut SqliteConnection,
         new_channels: Vec<NewChannel>,
