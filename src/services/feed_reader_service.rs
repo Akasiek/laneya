@@ -47,20 +47,17 @@ pub struct MediaThumbnail {
     pub url: String,
 }
 
-pub fn parse_feed(xml: &str) -> Result<YoutubeFeed, quick_xml::DeError> {
-    quick_xml::de::from_str(xml)
-}
+pub async fn read_channel_feed(
+    channel_id: &String,
+    client: Option<Arc<Client>>,
+) -> anyhow::Result<YoutubeFeed> {
+    let client = client.unwrap_or_else(|| Arc::new(Client::new()));
 
-pub async fn fetch_channel_feed_data(channel_id: &str) -> Result<YoutubeFeed, String> {
-    let url = format!("{}{}", YOUTUBE_FEED_URL, channel_id);
-    let client = Client::new();
+    let url = create_feed_url(&channel_id.to_string());
+    let xml = fetch_feed_data(&url, &client).await?;
+    let feed = parse_feed(&xml)?;
 
-    let xml = fetch_feed_data(&url, &client)
-        .await
-        .map_err(|e| format!("Could not reach YouTube: {}", e))?;
-
-    parse_feed(&xml)
-        .map_err(|_| format!("'{}' is not a valid YouTube channel ID.", channel_id))
+    Ok(feed)
 }
 
 pub async fn read_channels_feed(
@@ -76,7 +73,7 @@ pub async fn read_channels_feed(
             sleep(FEED_FETCH_DELAY).await;
         }
 
-        match read_channel_feed(&channel, &client).await {
+        match read_channel_feed(&channel.channel_id, Some(client.clone())).await {
             Ok(feed) => results.push((channel, Some(feed))),
             Err(e) => {
                 tracing::error!("Failed to fetch feed for channel {}: {}", channel.id, e);
@@ -88,21 +85,11 @@ pub async fn read_channels_feed(
     results
 }
 
-pub async fn read_channel_feed(
-    channel: &Channel,
-    client: &Client,
-) -> Result<YoutubeFeed, anyhow::Error> {
-    let feed_url = create_feed_url(channel);
-    let data = fetch_feed_data(&feed_url, client).await?;
-    let feed = parse_feed(&data)?;
-    Ok(feed)
+fn create_feed_url(channel_id: &String) -> String {
+    format!("{}{}", YOUTUBE_FEED_URL, channel_id)
 }
 
-pub fn create_feed_url(channel: &Channel) -> String {
-    format!("{}{}", YOUTUBE_FEED_URL, channel.channel_id)
-}
-
-pub async fn fetch_feed_data(feed_url: &str, client: &Client) -> anyhow::Result<String> {
+async fn fetch_feed_data(feed_url: &str, client: &Client) -> anyhow::Result<String> {
     let response = client.get(feed_url).send().await?;
 
     let status = response.status();
@@ -121,4 +108,8 @@ pub async fn fetch_feed_data(feed_url: &str, client: &Client) -> anyhow::Result<
     }
 
     Ok(response.text().await?)
+}
+
+fn parse_feed(xml: &str) -> Result<YoutubeFeed, quick_xml::DeError> {
+    quick_xml::de::from_str(xml)
 }

@@ -12,7 +12,7 @@ use axum::extract::multipart::Multipart;
 use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::response::{Html, IntoResponse, Response};
-use feed_reader_service::fetch_channel_feed_data;
+use feed_reader_service::read_channel_feed;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -30,7 +30,7 @@ pub async fn add_channel(
         return html_error!("Channel ID is required.").into_response();
     }
 
-    let channel_name = match fetch_channel_feed_data(&channel_id).await {
+    let channel_name = match read_channel_feed(&channel_id, None).await {
         Ok(feed) => feed.title,
         Err(e) => {
             return html_error!("{e}").into_response();
@@ -69,14 +69,14 @@ pub async fn update_channel(
         .trim()
         .to_string();
 
-    let validation_error = fetch_channel_feed_data(&channel_id).await.err();
+    let validation_error = read_channel_feed(&channel_id, None).await.err();
     let conn = &mut db::establish_connection();
 
     if let Some(ref e) = validation_error {
         if let Some(channel) = ChannelRepository::find_by_id(conn, id).unwrap_or_default() {
             let template = ChannelEditRowTemplate {
                 channel,
-                error: Some(e.clone()),
+                error: Some(format!("Invalid channel ID: {e}")),
             };
             return render_template!(template);
         }

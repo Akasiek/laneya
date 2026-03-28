@@ -128,8 +128,7 @@ impl ChannelRepository {
             }
         };
 
-        let client = reqwest::Client::new();
-        let feed = match read_channel_feed(&channel, &client).await {
+        let feed = match read_channel_feed(&channel.channel_id, None).await {
             Ok(feed) => feed,
             Err(e) => {
                 error!("Failed to fetch feed for channel {}: {}", channel.id, e);
