@@ -108,7 +108,7 @@ impl ChannelRepository {
         tokio::spawn(async move {
             info!("Starting feed refresh for channel {}", channel_id);
             if ChannelRepository::fetch_feed_for_channel(channel_id).await {
-                ws_service::send_refresh_notification(state).await;
+                ws_service::send_refresh_notification(state.feed_tx).await;
             }
         });
     }
@@ -149,7 +149,7 @@ impl ChannelRepository {
         tokio::spawn(async move {
             info!("Starting full feed refresh for all channels");
             if ChannelRepository::fetch_all_feeds().await {
-                ws_service::send_refresh_notification(state).await;
+                ws_service::send_refresh_notification(state.feed_tx).await;
             }
         });
     }

@@ -3,6 +3,7 @@ use crate::repositories::channel_repository::ChannelRepository;
 use std::time::Duration;
 use tokio::sync::broadcast::Sender;
 use tokio::time;
+use crate::services::ws_service;
 
 pub fn spawn_feed_refresh_job(feed_tx: Sender<()>) {
     tokio::spawn(async move {
@@ -27,7 +28,7 @@ pub async fn refresh_feed(feed_tx: Sender<()>) {
 
     if changed {
         tracing::info!("Feed changed, notifying clients.");
-        let _ = feed_tx.send(());
+        ws_service::send_refresh_notification(feed_tx).await;
     } else {
         tracing::info!("No changes detected in feeds.");
     }

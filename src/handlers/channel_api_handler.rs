@@ -104,7 +104,7 @@ pub async fn delete_channel(
     let conn = &mut db::establish_connection();
     match ChannelRepository::delete(conn, id) {
         Ok(_) => {
-            ws_service::send_refresh_notification(state).await;
+            ws_service::send_refresh_notification(state.feed_tx).await;
             Html(String::new()).into_response()
         }
         Err(e) => {
