@@ -1,4 +1,7 @@
-# Laneya
+<div align="center">
+  <img src="./templates/static/favicon.svg" alt="Laneya logo" width="64">
+  <h1>Laneya</h1>
+</div>
 
 > Self-hosted YouTube subscription follower and notification system
 
