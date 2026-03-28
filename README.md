@@ -2,7 +2,7 @@
 
 > Self-hosted YouTube subscription follower and notification system
 
-<img src="./templates/static/favicon-white.svg" alt="laneya logo" width="100" height="100"/>
+<div align="center"><img src="./assets/feed_screenshot.webp" alt="Screenshot of the videos feed page"></div>
 
 ## Name definition
 
@@ -86,7 +86,8 @@ Data is stored in the `laneya_data` Docker volume which can be changed if needed
 - The container filesystem is read-only - only the `/data` volume can be written to
 - All Linux capabilities are dropped
 - `no-new-privileges` is enforced - the process cannot gain elevated privileges via setuid/setgid binaries
-- Multi-stage Docker build - the runtime image contains only the compiled binary and static assets; no compiler, build tools, or source code
+- Multi-stage Docker build - the runtime image contains only the compiled binary and static assets; no compiler, build
+  tools, or source code
 
 ---
 
