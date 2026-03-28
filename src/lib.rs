@@ -3,6 +3,7 @@ pub mod handlers {
     pub mod channel_page_handler;
     pub mod error_handler;
     pub mod index_handler;
+    pub mod feed_handler;
     pub mod video_handler;
     pub mod ws_handler;
 }
