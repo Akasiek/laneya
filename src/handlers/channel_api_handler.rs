@@ -45,8 +45,8 @@ pub async fn add_channel(
             channel_name,
         },
     ) {
-        Ok(new_id) => {
-            ChannelRepository::spawn_channel_feed_refresh(state, new_id);
+        Ok(channel) => {
+            ChannelRepository::spawn_channel_feed_refresh(state, channel.id);
             htmx_redirect("/channels")
         }
         Err(e) => {

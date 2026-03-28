@@ -17,14 +17,13 @@ impl ChannelRepository {
         Ok(result)
     }
 
-    pub fn create(conn: &mut SqliteConnection, new_channel: NewChannel) -> anyhow::Result<i32> {
+    pub fn create(conn: &mut SqliteConnection, new_channel: NewChannel) -> anyhow::Result<Channel> {
         use crate::schema::channels::dsl::*;
-        let new_id = diesel::insert_into(channels)
+        let channel = diesel::insert_into(channels)
             .values(&new_channel)
-            .returning(id)
-            .get_result::<i32>(conn)?;
+            .get_result::<Channel>(conn)?;
 
-        Ok(new_id)
+        Ok(channel)
     }
 
     pub fn bulk_create(
@@ -174,8 +173,7 @@ impl ChannelRepository {
                 Ok(true) => {
                     info!(
                         "New/updated videos for channel {} ({})",
-                        channel.channel_name,
-                        channel.id
+                        channel.channel_name, channel.id
                     );
                     any_changed = true;
                 }
