@@ -1008,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "laneya"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "askama",
@@ -1022,7 +1022,6 @@ dependencies = [
  "quick-xml",
  "reqwest",
  "serde",
- "serde_json",
  "tokio",
  "tower-http",
  "tracing",
