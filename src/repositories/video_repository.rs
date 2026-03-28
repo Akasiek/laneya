@@ -1,62 +1,101 @@
+use crate::config::Config;
 use crate::models::video::{NewVideo, VideoResource};
 use crate::schema::{channels, videos};
 use crate::services::feed_reader_service::{FeedEntry, YoutubeFeed};
 use diesel::prelude::*;
+use tracing::error;
 
 pub struct VideoRepository;
+
+const SHORT_URL: &'static str = "https://www.youtube.com/shorts/";
 
 impl VideoRepository {
     /// Upsert feed entries for a given channel.
     /// Returns true if any new videos were inserted or existing ones changed.
     pub fn upsert_from_feed(
         conn: &mut SqliteConnection,
-        channel_db_id: i32,
+        channel_id: i32,
         feed: &YoutubeFeed,
     ) -> anyhow::Result<bool> {
-        let filter_out_shorts = crate::config::Config::get().filter_out_shorts;
         let mut changed = false;
 
-        for entry in &feed.entries {
-            if filter_out_shorts
-                && entry
-                    .link
-                    .href
-                    .starts_with("https://www.youtube.com/shorts/")
-            {
-                continue;
-            }
-            let existing: Option<(String, String)> = videos::table
-                .filter(videos::video_id.eq(&entry.video_id))
-                .select((videos::title, videos::updated_at))
-                .first(conn)
-                .optional()?;
-
-            let is_new_or_changed = match existing {
-                None => true,
-                Some((title, updated_at)) => title != entry.title || updated_at != entry.updated,
-            };
-
-            if is_new_or_changed {
-                let new_video = Self::new_video_from_entry(entry, channel_db_id);
-
-                diesel::insert_into(videos::table)
-                    .values(&new_video)
-                    .on_conflict(videos::video_id)
-                    .do_update()
-                    .set((
-                        videos::title.eq(&new_video.title),
-                        videos::video_url.eq(&new_video.video_url),
-                        videos::thumbnail_url.eq(&new_video.thumbnail_url),
-                        videos::published_at.eq(&new_video.published_at),
-                        videos::updated_at.eq(&new_video.updated_at),
-                    ))
-                    .execute(conn)?;
-
-                changed = true;
+        for video in &feed.entries {
+            match Self::upsert_video(conn, video, channel_id) {
+                Ok(video_changed) => {
+                    if video_changed {
+                        changed = true;
+                    }
+                }
+                Err(_) => (),
             }
         }
 
         Ok(changed)
+    }
+
+    /// Upsert a single video entry.
+    /// Returns Ok(true) if the video was new or updated, Ok(false) if it was unchanged, and Err(()) on failure.
+    fn upsert_video(
+        conn: &mut SqliteConnection,
+        video: &FeedEntry,
+        channel_id: i32,
+    ) -> Result<bool, ()> {
+        if Self::should_filter_video(video) {
+            return Ok(false);
+        }
+
+        let existing: Option<(String, String)> = match videos::table
+            .filter(videos::video_id.eq(&video.video_id))
+            .select((videos::title, videos::updated_at))
+            .first(conn)
+            .optional()
+        {
+            Ok(e) => e,
+            Err(e) => {
+                error!("Failed to query existing video {}: {}", video.video_id, e);
+                return Err(());
+            }
+        };
+
+        let is_new_or_changed = match existing {
+            None => true,
+            Some((title, updated_at)) => title != video.title || updated_at != video.updated,
+        };
+
+        if is_new_or_changed {
+            let new_video = Self::new_video_from_entry(video, channel_id);
+
+            match diesel::insert_into(videos::table)
+                .values(&new_video)
+                .on_conflict(videos::video_id)
+                .do_update()
+                .set((
+                    videos::title.eq(&new_video.title),
+                    videos::video_url.eq(&new_video.video_url),
+                    videos::thumbnail_url.eq(&new_video.thumbnail_url),
+                    videos::published_at.eq(&new_video.published_at),
+                    videos::updated_at.eq(&new_video.updated_at),
+                ))
+                .execute(conn)
+            {
+                Ok(_) => (),
+                Err(e) => {
+                    error!("Failed to upsert video {}: {}", video.video_id, e);
+                    return Err(());
+                }
+            }
+
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    fn should_filter_video(entry: &FeedEntry) -> bool {
+        let filter_out_shorts = Config::get().filter_out_shorts;
+        let is_short = entry.link.href.starts_with(SHORT_URL);
+
+        filter_out_shorts && is_short
     }
 
     fn new_video_from_entry(entry: &FeedEntry, channel_db_id: i32) -> NewVideo {
@@ -75,7 +114,7 @@ impl VideoRepository {
         conn: &mut SqliteConnection,
         page: i64,
     ) -> anyhow::Result<(Vec<VideoResource>, i64)> {
-        let per_page = crate::config::Config::get().videos_per_page;
+        let per_page = Config::get().videos_per_page;
 
         let total: i64 = videos::table.count().get_result(conn)?;
         let total_pages = ((total + per_page - 1) / per_page).max(1);
