@@ -164,11 +164,14 @@ impl ChannelRepository {
         });
 
         let client = Arc::new(reqwest::Client::new());
-        let results = read_channels_feed(channels_list, client).await;
+        let feeds = read_channels_feed(channels_list, client).await;
 
         let mut any_changed = false;
-        for (channel, feed) in results {
-            let Some(feed) = feed else { continue };
+        for (channel, feed) in feeds {
+            let Some(feed) = feed else {
+                error!("Failed to fetch feed for channel {}: No feed data", channel.id);
+                continue;
+            };
 
             match VideoRepository::upsert_from_feed(conn, channel.id, &feed) {
                 Err(e) => error!(
