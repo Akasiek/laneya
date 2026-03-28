@@ -7,34 +7,41 @@ on:
     branches: ["main"]
 
 jobs:
-  trivy:
-    name: Trivy image scan
+  docker-scout:
+    name: Docker Scout CVE scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write # required to upload SARIF results
+      security-events: write  # required to upload SARIF results
+      pull-requests: write    # required to write PR comments
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PAT }}
+
       - name: Build Docker image
         run: docker build -t laneya:${{ github.sha }} .
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.35.0
+      - name: Docker Scout CVE scan
+        id: docker-scout
+        uses: docker/scout-action@v1
         with:
-          image-ref: laneya:${{ github.sha }}
-          format: sarif
-          output: trivy-results.sarif
-          severity: CRITICAL,HIGH
-          exit-code: "1"
-          ignore-unfixed: true
-          vuln-type: os,library
+          command: cves
+          image: laneya:${{ github.sha }}
+          only-severities: critical,high
+          only-fixed: true
+          sarif-file: sarif.output.json
+          summary: true
+          exit-code: true
 
       - name: Upload results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        # Run even if trivy found vulnerabilities (so results are always uploaded)
         if: always()
         with:
-          sarif_file: trivy-results.sarif
+          sarif_file: sarif.output.json
