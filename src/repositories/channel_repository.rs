@@ -6,7 +6,7 @@ use crate::services::feed_reader_service::{read_channel_feed, read_channels_feed
 use crate::services::ws_service;
 use diesel::prelude::*;
 use std::collections::HashSet;
-use tracing::info;
+use tracing::{error, info};
 
 pub struct ChannelRepository;
 
@@ -112,14 +112,17 @@ impl ChannelRepository {
         });
     }
 
-    pub async fn fetch_feed_for_channel(channel_id_pk: i32) -> bool {
+    async fn fetch_feed_for_channel(channel_id_pk: i32) -> bool {
         let conn = &mut db::establish_connection();
 
         let channel = match Self::find_by_id(conn, channel_id_pk) {
             Ok(Some(c)) => c,
-            Ok(None) => return false,
+            Ok(None) => {
+                error!("Channel with id {} not found", channel_id_pk);
+                return false
+            },
             Err(e) => {
-                tracing::error!("Failed to fetch channel {}: {}", channel_id_pk, e);
+                error!("Failed to fetch channel {}: {}", channel_id_pk, e);
                 return false;
             }
         };
@@ -128,7 +131,7 @@ impl ChannelRepository {
         let feed = match read_channel_feed(&channel, &client).await {
             Ok(feed) => feed,
             Err(e) => {
-                tracing::error!("Failed to fetch feed for channel {}: {}", channel.id, e);
+                error!("Failed to fetch feed for channel {}: {}", channel.id, e);
                 return false;
             }
         };
@@ -136,7 +139,7 @@ impl ChannelRepository {
         match VideoRepository::upsert_from_feed(conn, channel.id, &feed) {
             Ok(changed) => changed,
             Err(e) => {
-                tracing::error!("Failed to upsert feed for channel {}: {}", channel.id, e);
+                error!("Failed to upsert feed for channel {}: {}", channel.id, e);
                 false
             }
         }
@@ -155,7 +158,7 @@ impl ChannelRepository {
         let conn = &mut db::establish_connection();
 
         let channels_list = Self::find_all(conn).unwrap_or_else(|e| {
-            tracing::error!("Failed to fetch channels: {}", e);
+            error!("Failed to fetch channels: {}", e);
             Vec::new()
         });
 
@@ -167,7 +170,7 @@ impl ChannelRepository {
             let Some(feed) = feed else { continue };
 
             match VideoRepository::upsert_from_feed(conn, channel.id, &feed) {
-                Err(e) => tracing::error!(
+                Err(e) => error!(
                     "Failed to upsert videos for channel {} ({}): {}",
                     channel.channel_name,
                     channel.id,
