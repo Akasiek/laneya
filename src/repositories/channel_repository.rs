@@ -83,6 +83,8 @@ impl ChannelRepository {
 
     pub fn delete(conn: &mut SqliteConnection, channel_id_pk: i32) -> anyhow::Result<()> {
         use crate::schema::channels::dsl::*;
+
+        // First delete associated videos
         VideoRepository::delete_by_channel_id(conn, channel_id_pk)?;
         diesel::delete(channels.filter(id.eq(channel_id_pk))).execute(conn)?;
 
