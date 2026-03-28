@@ -158,12 +158,12 @@ impl VideoRepository {
     }
 }
 
-fn format_published_at(iso: &str) -> String {
-    chrono::DateTime::parse_from_rfc3339(iso)
+fn format_published_at(timestamp: &str) -> String {
+    chrono::DateTime::parse_from_rfc3339(timestamp)
         .map(|dt| {
             dt.with_timezone(&chrono::Local)
                 .format("%d %b %Y %H:%M")
                 .to_string()
         })
-        .unwrap_or_else(|_| iso.to_string())
+        .unwrap_or_else(|_| timestamp.to_string())
 }
