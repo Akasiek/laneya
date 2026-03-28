@@ -6,6 +6,7 @@ services:
       - "8080:8080"
     volumes:
       - laneya_data:/data
+
     environment:
       # Timezone for videos timestamps
       TZ: "UTC"
@@ -16,6 +17,11 @@ services:
       # How often to fetch new videos from YouTube
       FEED_REFRESH_INTERVAL_MINS: "5"
 
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL # Drop all Linux capabilities. The application doesn't need any special permissions.
+
 volumes:
   laneya_data:
-
