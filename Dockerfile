@@ -28,7 +28,8 @@ RUN cargo build --release
 # Runtime stage
 FROM alpine:3.23
 
-RUN apk add --no-cache sqlite-libs ca-certificates tzdata
+RUN apk upgrade --no-cache \
+ && apk add --no-cache sqlite-libs ca-certificates tzdata
 
 # Create a non-root system user with no home dir and no login shell
 RUN addgroup -S laneya \
