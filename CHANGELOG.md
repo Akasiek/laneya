@@ -1,3 +1,22 @@
+## [1.0.2] - 2026-09-05
+
+### 🚀 Features
+
+- Update favicon and enhance navigation bar
+
+### 🐛 Bug Fixes
+
+- Add user permissions note for data volume mounts in README
+- Align package metadata at version 1.0.2
+
+### 📚 Documentation
+
+- Update README to include logo and improve header alignment
+
+### 🎨 Styling
+
+- Improve responsive video grid layout
+
 ## [1.0.1] - 2026-03-28
 
 ### 🐛 Bug Fixes
