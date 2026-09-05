@@ -35,8 +35,8 @@ pub struct VideoResource {
     pub title: String,
     pub video_url: String,
     pub thumbnail_url: String,
-    /// Human-readable date, e.g. "26 Mar 2026".
     pub published_at: String,
+    pub published_at_relative: String,
     pub channel_id: String,
     pub channel_name: String,
 }

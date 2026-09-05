@@ -126,6 +126,7 @@ impl VideoRepository {
                 videos::video_url,
                 videos::thumbnail_url,
                 videos::published_at,
+                videos::published_at,
                 channels::channel_id,
                 channels::channel_name,
             ))
@@ -135,7 +136,8 @@ impl VideoRepository {
             .load::<VideoResource>(conn)?;
 
         for v in &mut rows {
-            v.published_at = format_published_at(&v.published_at);
+            v.published_at = format_published_at(&v.published_at, false);
+            v.published_at_relative = format_published_at(&v.published_at_relative, true);
         }
 
         Ok((rows, total_pages))
@@ -163,12 +165,26 @@ impl VideoRepository {
     }
 }
 
-fn format_published_at(timestamp: &str) -> String {
-    chrono::DateTime::parse_from_rfc3339(timestamp)
-        .map(|dt| {
-            dt.with_timezone(&chrono::Local)
-                .format("%d %b %Y %H:%M")
-                .to_string()
-        })
-        .unwrap_or_else(|_| timestamp.to_string())
+fn format_published_at(timestamp: &str, relative: bool) -> String {
+    let Ok(dt) = chrono::DateTime::parse_from_rfc3339(timestamp) else {
+        return timestamp.to_string();
+    };
+
+    let published = dt.with_timezone(&chrono::Local);
+    let now = chrono::Local::now();
+    let diff = now.signed_duration_since(published);
+
+    if !relative {
+        return published.format("%Y-%m-%d %H:%M").to_string();
+    }
+
+    if diff.num_minutes() < 60 {
+        format!("{}m ago", diff.num_minutes())
+    } else if diff.num_hours() < 24 {
+        format!("{}h ago", diff.num_hours())
+    } else if diff.num_days() < 7 {
+        format!("{}d ago", diff.num_days())
+    } else {
+        published.format("%d %b %Y").to_string()
+    }
 }

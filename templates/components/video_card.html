@@ -16,7 +16,9 @@
             >
                 {{ video.channel_name }}
             </a>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500">{{ video.published_at }}</p>
+            <p class="text-xs z-10 text-zinc-400 dark:text-zinc-500 cursor-default" title="{{ video.published_at }}">
+                {{ video.published_at_relative }}
+            </p>
         </div>
     </div>
 </div>
