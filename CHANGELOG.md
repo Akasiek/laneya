@@ -1,3 +1,13 @@
+## [1.0.3] - 2026-09-05
+
+### 🚀 Features
+
+- Use relative date in Video Card
+
+### ⚙️ Miscellaneous Tasks
+
+- Change app version to v1.0.3
+
 ## [1.0.2] - 2026-09-05
 
 ### 🚀 Features
@@ -12,11 +22,11 @@
 ### 📚 Documentation
 
 - Update README to include logo and improve header alignment
+- Document 1.0.2 release improvements
 
 ### 🎨 Styling
 
 - Improve responsive video grid layout
-
 ## [1.0.1] - 2026-03-28
 
 ### 🐛 Bug Fixes
