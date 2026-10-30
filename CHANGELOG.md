@@ -1,3 +1,12 @@
+## [1.1.0] - 2026-10-30
+
+### 🚜 Refactor
+
+- Remove unused htmx import from feed_socket.js
+
+### ⚙️ Miscellaneous Tasks
+
+- Add GitHub workflow for automated release creation
 ## [1.0.4] - 2026-10-30
 
 ### 🚀 Features
@@ -9,7 +18,6 @@
 ### 🎨 Styling
 
 - Add `.table` and `.h-full` utility classes to Tailwind CSS
-
 ## [1.0.3] - 2026-09-05
 
 ### 🚀 Features
