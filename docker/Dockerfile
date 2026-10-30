@@ -14,7 +14,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # Install JS deps first for better layer caching
-COPY templates/package.json templates/pnpm-lock.yaml ./templates/
+COPY templates/package.json templates/pnpm-lock.yaml templates/pnpm-workspace.yaml ./templates/
 RUN cd templates && pnpm install --frozen-lockfile
 
 # Copy source (node_modules excluded via .dockerignore)
