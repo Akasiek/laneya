@@ -1,3 +1,15 @@
+## [1.0.4] - 2026-10-30
+
+### 🚀 Features
+
+- Add WebSocket heartbeat and status indicators
+- Add oxfmt and oxlint configurations and scripts and format files
+- Add support for custom YouTube frontend URLs
+
+### 🎨 Styling
+
+- Add `.table` and `.h-full` utility classes to Tailwind CSS
+
 ## [1.0.3] - 2026-09-05
 
 ### 🚀 Features
@@ -7,7 +19,6 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Change app version to v1.0.3
-
 ## [1.0.2] - 2026-09-05
 
 ### 🚀 Features
