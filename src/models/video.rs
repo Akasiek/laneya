@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::schema::videos;
 use diesel::{Insertable, Queryable, Selectable};
 
@@ -39,4 +40,20 @@ pub struct VideoResource {
     pub published_at_relative: String,
     pub channel_id: String,
     pub channel_name: String,
+}
+
+impl VideoResource {
+    pub fn playback_url(&self) -> String {
+        let Some(base_url) = &Config::get().youtube_frontend_url else {
+            return self.video_url.clone();
+        };
+
+        let mut url = base_url.clone();
+        let path = format!("{}/watch", url.path().trim_end_matches('/'));
+        url.set_path(&path);
+        url.set_query(None);
+        url.set_fragment(None);
+        url.query_pairs_mut().append_pair("v", &self.video_id);
+        url.to_string()
+    }
 }

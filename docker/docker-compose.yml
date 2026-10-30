@@ -21,6 +21,8 @@ services:
       VIDEOS_PER_PAGE: "24"
       # How often to fetch new videos from YouTube
       FEED_REFRESH_INTERVAL_MINS: "5"
+      # Optional base URL for video links (the frontend must support /watch?v=VIDEO_ID)
+      # YOUTUBE_FRONTEND_URL: "https://invidious.example.com"
 
     read_only: true
     security_opt:

@@ -78,13 +78,19 @@ Data is stored in the `laneya_data` Docker volume which can be changed if needed
 
 ### Environment variables
 
-| Variable                     | Default        | Description                                |
-|------------------------------|----------------|--------------------------------------------|
-| `HOST`                       | `0.0.0.0:8080` | Address and port the server listens on     |
-| `TZ`                         | `UTC`          | Timezone used for video timestamps         |
-| `FILTER_OUT_SHORTS`          | `false`        | Set to `true` to hide YouTube Shorts       |
-| `VIDEOS_PER_PAGE`            | `24`           | Number of videos displayed per page        |
-| `FEED_REFRESH_INTERVAL_MINS` | `5`            | How often (in minutes) feeds are refreshed |
+| Variable                     | Default        | Description                                                           |
+|------------------------------|----------------|-----------------------------------------------------------------------|
+| `HOST`                       | `0.0.0.0:8080` | Address and port the server listens on                                |
+| `TZ`                         | `UTC`          | Timezone used for video timestamps                                    |
+| `FILTER_OUT_SHORTS`          | `false`        | Set to `true` to hide YouTube Shorts                                  |
+| `VIDEOS_PER_PAGE`            | `24`           | Number of videos displayed per page                                   |
+| `FEED_REFRESH_INTERVAL_MINS` | `5`            | How often (in minutes) feeds are refreshed                            |
+| `YOUTUBE_FRONTEND_URL`       | unset          | Optional base URL of a YouTube-compatible frontend, such as Invidious |
+
+Set `YOUTUBE_FRONTEND_URL=https://invidious.example.com` to open videos at
+`https://invidious.example.com/watch?v=VIDEO_ID`. The frontend must support this
+watch URL format. A base path is supported, for example `https://example.com/invidious`.
+Query parameters and fragments in the configured base URL are discarded.
 
 ### Container security
 
