@@ -1,21 +1,24 @@
-{% extends "layouts/base.html" %}
-
-{% block title %}Laneya | Feed{% endblock %}
-
+{% extends "layouts/base.html" %} {% block title %}Laneya | Feed{% endblock %}
 {% block content %}
 <div class="container mx-auto py-8">
-    <div class="px-4">
-        <div class="flex items-center gap-4 mb-6">
-            <h2 class="text-lg text-zinc-700 dark:text-zinc-300">Latest Videos</h2>
-            {% include "components/refresh_button.html" %}
-        </div>
-
-        <!-- Video Grid via WebSocket -->
-        <div hx-ext="ws" ws-connect="/ws">
-            <div id="video-section">
-                <p class="text-zinc-500 dark:text-zinc-400">Connecting…</p>
-            </div>
-        </div>
+  <div class="px-4">
+    <div class="flex flex-wrap items-center gap-4 mb-6">
+      <h2 class="text-lg text-zinc-700 dark:text-zinc-300">Latest Videos</h2>
+      {% include "components/refresh_button.html" %}
+      {% include "components/websocket_status.html" %}
     </div>
+
+    <!-- Video Grid via WebSocket -->
+    <div id="feed-socket" hx-ext="ws" ws-connect="/ws">
+      <div id="video-section">
+        <p class="text-zinc-500 dark:text-zinc-400">Connecting…</p>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+  {% include "scripts/feed_socket.js" %}
+</script>
+
 {% endblock %}
