@@ -1,5 +1,3 @@
-import htmx from "htmx.org";
-
 (() => {
   const feedSocket = document.getElementById("feed-socket");
   const label = document.getElementById("feed-connection-label");
