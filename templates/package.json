@@ -1,13 +1,19 @@
 {
+  "scripts": {
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint --deny-warnings scripts",
+    "lint:fix": "oxlint --fix --deny-warnings scripts",
+    "watch:css": "tailwindcss -i ./styles/styles.css -o ./styles/tailwind.css --watch"
+  },
   "dependencies": {
     "htmx-ext-ws": "^2.0.4",
     "htmx.org": "^2.0.11",
     "tailwindcss": "^4.3.3"
   },
-  "scripts": {
-    "watch:css": "tailwindcss -i ./styles/styles.css -o ./styles/tailwind.css --watch"
-  },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.3"
+    "@tailwindcss/cli": "^4.3.3",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0"
   }
 }

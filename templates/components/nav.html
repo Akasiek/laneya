@@ -1,34 +1,36 @@
-<nav class="sticky top-0 z-20 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-    <div class="container mx-auto px-4 py-1.5 flex items-center gap-2">
-
-        <a href="/" class="font-extrabold text-lg tracking-tight pr-2 py-2 flex items-center gap-2 group">
-            <img
-                alt="Laneya Logo"
-                src="/static/favicon.svg"
-                class="inline-block w-6 h-6 group-hover:scale-110 transition-transform"
-            >
-            Laneya
-        </a>
-        <a
-            href="/"
-            class="nav-link text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-amber-500
-            dark:hover:text-amber-400 transition px-2 py-2"
-        >
-            Feed
-        </a>
-        <a
-            href="/channels"
-            class="nav-link text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-amber-500
-            dark:hover:text-amber-400 transition px-2 py-2"
-        >
-            Channels
-        </a>
-    </div>
+<nav
+  class="sticky top-0 z-20 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950"
+>
+  <div class="container mx-auto px-4 py-1.5 flex items-center gap-2">
+    <a
+      href="/"
+      class="font-extrabold text-lg tracking-tight pr-2 py-2 flex items-center gap-2 group"
+    >
+      <img
+        alt="Laneya Logo"
+        src="/static/favicon.svg"
+        class="inline-block w-6 h-6 group-hover:scale-110 transition-transform"
+      />
+      Laneya
+    </a>
+    <a
+      href="/"
+      class="nav-link text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 transition px-2 py-2"
+    >
+      Feed
+    </a>
+    <a
+      href="/channels"
+      class="nav-link text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-amber-500 dark:hover:text-amber-400 transition px-2 py-2"
+    >
+      Channels
+    </a>
+  </div>
 </nav>
 <script>
-    document.querySelectorAll('.nav-link').forEach(a => {
-        if (a.getAttribute('href') === window.location.pathname) {
-            a.classList.add('!text-amber-500', 'dark:!text-amber-400');
-        }
-    });
+  document.querySelectorAll(".nav-link").forEach((a) => {
+    if (a.getAttribute("href") === window.location.pathname) {
+      a.classList.add("!text-amber-500", "dark:!text-amber-400");
+    }
+  });
 </script>
